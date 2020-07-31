@@ -35,19 +35,22 @@ class ViewController: UIViewController {
         guard let data = UIImage(named: "me")?.pngData() else {
             fatalError()
         }
-        let image = EmojiImage(name: ":me:", data: data, lineHeight: 16)
+        let image = EmojiImage(name: ":me:", data: data, lineHeight: 20)
         return [image]
     }()
     
+    var token: NSKeyValueObservation?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        textView.delegate = self
+        NotificationCenter.default.addObserver(self, selector: #selector(handle(_:)), name: UITextView.textDidChangeNotification, object: nil)
     }
 }
 
-extension ViewController: UITextViewDelegate {
-    func textViewDidChange(_ textView: UITextView) {
-        guard let text = textView.text, let textFieldAttributedString = textView.attributedText else {
+extension ViewController {
+    @objc
+    func handle(_ notification: Notification) {
+        guard let textView = notification.object as? UITextView, let text = textView.text, let textFieldAttributedString = textView.attributedText else {
             return
         }
         if let emoji = myEmojis.first(where: { text.contains($0.name) }), let range = text.range(of: emoji.name) {
@@ -56,6 +59,7 @@ extension ViewController: UITextViewDelegate {
             let mutableString = NSMutableAttributedString()
             mutableString.append(emoji.convertDataToText())
             attributedString.replaceCharacters(in: nsRange, with: mutableString)
+            attributedString.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 20), range: NSRange(location: 0, length: attributedString.length))
             textView.attributedText = attributedString
         }
     }
