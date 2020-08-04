@@ -69,14 +69,14 @@ class ViewController: UIViewController {
 extension ViewController {
     @objc
     func handle(_ notification: Notification) {
-        guard let textView = notification.object as? UITextView, let text = textView.text, let textFieldAttributedString = textView.attributedText else {
+        guard let textView = notification.object as? UITextView, let text = textView.text else {
             return
         }
         for emoji in myEmojis {
-            guard let expression = try? NSRegularExpression(pattern: ":\(emoji.name):") else {
+            guard let expression = try? NSRegularExpression(pattern: "\(emoji.name)") else {
                 continue
             }
-            let currentAttributedString = NSMutableAttributedString(string: text)
+            let currentAttributedString = NSMutableAttributedString(attributedString: textView.attributedText)
             let matches = expression.matches(in: text, range: NSRange(location: 0, length: text.count))
             if matches.isEmpty {
                 continue
@@ -93,15 +93,6 @@ extension ViewController {
                 currentAttributedString.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: emoji.lineHeight), range: NSRange(location: 0, length: currentAttributedString.length))
                 textView.attributedText = currentAttributedString
             }
-        }
-        if let emoji = myEmojis.first(where: { text.contains($0.name) }), let range = text.range(of: emoji.name) {
-            let nsRange = NSRange(range, in: text)
-            let attributedString = NSMutableAttributedString(attributedString: textFieldAttributedString)
-            let mutableString = NSMutableAttributedString()
-            mutableString.append(emoji.convertDataToText())
-            attributedString.replaceCharacters(in: nsRange, with: mutableString)
-            attributedString.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 20), range: NSRange(location: 0, length: attributedString.length))
-            textView.attributedText = attributedString
         }
     }
 }
